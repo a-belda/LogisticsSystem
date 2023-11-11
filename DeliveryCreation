@@ -1,0 +1,76 @@
+import datetime
+import re
+from e2_inventorymanagement import InventoryManagement
+
+class DeliveryCreation:
+    def __init__(self, inventory_system):
+        self.delivery_data = {}
+        self.inventory_system = inventory_system
+
+    def create_delivery(self):
+        delivery_number = input("Enter Delivery number for reference tracking: ")
+        self.delivery_data[delivery_number] = {}
+
+        # Pickup date
+        pickup_date = input("Enter requested pickup date (format: yyyy-mm-dd): ")
+        try:
+            datetime.datetime.strptime(pickup_date, '%Y-%m-%d')
+            self.delivery_data[delivery_number]['Pickup Date'] = pickup_date
+        except ValueError:
+            print("Error: This is the wrong date format. It should be YYYY-MM-DD")
+
+        # Pickup and Drop-off location
+        zip_pattern = re.compile(r'^\d{5}$')
+        pickup_zip = input("Enter zip code of pickup location (5 digit US zip code): ")
+        dropoff_zip = input("Enter zip code of drop-off location (5 digit US zip code): ")
+        if zip_pattern.fullmatch(pickup_zip) and zip_pattern.fullmatch(dropoff_zip):
+            self.delivery_data[delivery_number]['Pick-up Location'] = pickup_zip
+            self.delivery_data[delivery_number]['Drop-off Location'] = dropoff_zip
+        else:
+            print("Invalid US zip code. It should be a 5 digit number.")
+
+        # Stop locations
+        stop_location_count = int(input("Enter number of stop locations for the delivery: "))
+        stop_locations = []
+        for i in range(stop_location_count):
+            stop_zip = input(f"Enter zip code of stop location {i+1} (5 digit US zip code): ")
+            if zip_pattern.fullmatch(stop_zip):
+                stop_locations.append(stop_zip)
+            else:
+                print(f"Invalid US zip code entered for stop location {i+1}. It should be a 5 digit number.")
+        self.delivery_data[delivery_number]['Stop Locations'] = stop_locations
+
+        # Mode of shipping
+        shipping_mode = input("Choose what is the shipping mode: Truck Load, Small Truck, Van, Ocean, Large Truck Load: ")
+        self.delivery_data[delivery_number]['Shipping Mode'] = shipping_mode
+
+        # Carrier special instruction
+        self.delivery_data[delivery_number]['Special Instruction'] = input("Enter carrier special instruction for the delivery: ")
+
+        print("Delivery created successfully!")
+
+    def get_delivery(self, delivery_number):
+        if delivery_number in self.delivery_data:
+            print(f"\nDelivery Details for {delivery_number}: ")
+            for k, v in self.delivery_data[delivery_number].items():
+                print(f"{k}: {v}")
+        else:
+            print("No such delivery number exists!")
+
+def main():
+    inventory_system = InventoryManagement()
+    delivery_system = DeliveryCreation(inventory_system)
+
+    # Incorporate the delivery creation into the inventory management process
+    # You can replace this with your actual process
+    while True:
+        delivery_system.create_delivery()
+        cont = input("Do you want to create another delivery? (yes/no): ")
+        if cont.lower() != 'yes':
+            break
+
+    delivery_number = input("\nEnter a delivery number to get its details: ")
+    delivery_system.get_delivery(delivery_number)
+
+if __name__ == "__main__":
+    main()
